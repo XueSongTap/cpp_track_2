@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.tcc": "c",
+        "cstdlib": "c",
+        "memory": "c",
+        "lauxlib.h": "c",
+        "lua.h": "c",
+        "cmath": "c"
+    },
+    "lua.targetVersion": "5.3"
+}

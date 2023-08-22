@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<cross-domain-policy>
+  <allow-access-from domain="*" />
+</cross-domain-policy>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .btn {
+      width: 100px;
+      height: 100px;
+      border: none;
+      border: 1px dashed rgb(31, 154, 158);
+      background: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button id="btn" class="btn">上传文件</button>
+  <input id="input" type="file" style="display: none;" />
+  <script src="https://lib.baomitu.com/axios/0.21.1/axios.min.js"></script>
+  <script>
+    const axios = window.axios.create({ baseURL: 'http://192.168.206.135:3000' })
+
+    const domBtn = document.querySelector('#btn')
+    const domInput = document.querySelector('#input')
+    domBtn.onclick = function () {
+      domInput.click()
+    }
+    domInput.onchange = async function (ev) {
+      const [ file ] = ev.target.files
+
+      const params = { filename: file.name }
+      const resCheck = await axios.get('/api/check', { params })
+      if (resCheck.status === 200 && resCheck.data.code === 0) {
+        upload(resCheck.data.data.index)
+      }
+
+      async function upload (blobIndex) {
+        const chunkSize = 10 // 定义10字节为一个小块
+        const startIndex = blobIndex * chunkSize // 定义本次上传的开始位置
+        if (file.size < startIndex) { // 代表文件小块都上传完毕，停止上传
+          const resMerge = await axios.post('/api/merge', { filename: file.name })
+          console.log('resMerge: ', resMerge)
+          return
+        }
+
+        const blob = file.slice(startIndex, startIndex + chunkSize) // 获取本次上传的Blob格式文件内容
+        const fileBlob = new File([blob], file.name) // 将Blob转换成File
+        const formData = new FormData()
+        formData.append('fileBlob', fileBlob)
+        formData.append('fileBlobIndex', blobIndex) // 标明本次上传的索引
+        const resUpload = await axios.post('/api/upload', formData)
+        if (resUpload.status === 200 && resUpload.data.code === 0) {
+          upload(blobIndex + 1) // 如果上传成功则继续上传下一个文件小块
+        }
+      }
+
+    }
+  </script>
+</body>
+</html>

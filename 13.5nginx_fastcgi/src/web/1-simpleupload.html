@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<cross-domain-policy>
+  <allow-access-from domain="*" />
+</cross-domain-policy>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .btn {
+      width: 100px;
+      height: 100px;
+      border: none;
+      border: 1px dashed rgb(31, 154, 158);
+      background: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button id="btn" class="btn">上传文件</button>
+  <input id="input" type="file" style="display: none;" />
+  <script src="https://lib.baomitu.com/axios/0.21.1/axios.js"></script>
+  <script>
+    // const axios = window.axios.create({ baseURL: 'http://localhost:3000' })
+    const axios = window.axios.create({ baseURL: 'http://192.168.206.135:3000' }) // 自己的服务器地址
+    
+
+    const domBtn = document.querySelector('#btn')
+    const domInput = document.querySelector('#input')
+    domBtn.onclick = function () {
+      domInput.click()
+    }
+    domInput.onchange = async function (ev) {
+      console.log(ev.target.files)
+      const [ file ] = ev.target.files
+      const formData = new FormData()
+      formData.append('user', 'qingfuliao')
+      formData.append('token', '123xxx') // 设置token
+      formData.append('filesize', file.size.toString()) // 设置文件大小
+      formData.append('file', file)
+      const res = await axios.post('/api/upload', formData) // 直接阻塞
+      console.log('res: ', res)
+    }
+  </script>
+</body>
+</html>
